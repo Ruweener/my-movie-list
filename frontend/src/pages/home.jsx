@@ -5,7 +5,7 @@ import NavBar from "../components/NavBar";
 
 function App() {
 
-  const [movies, setMovies] = useState([{ id: 1, title: "Loading..." }]);
+  const [movies, setMovies] = useState([]);
   const [query, setQuery] = useState("");
 
   useEffect(() => {
@@ -34,11 +34,7 @@ function App() {
     <div className="flex flex-col items-center w-screen h-screen bg-gray-800">
       <NavBar />
 
-      <h1 className="font-bold text-3xl mt-8 mb-4 text-center w-full text-amber-50">
-        Select Movie to Review
-      </h1>
-
-      <form className="flex w-full justify-center m-1" onSubmit={ handleSearch }>
+      <form className="flex w-full justify-center m-1 mt-24" onSubmit={ handleSearch }>
         <input
           type="text"
           placeholder="Search movies..."
@@ -47,10 +43,9 @@ function App() {
         />
         <button
           type="submit"
-          className="ml-2 p-2 h-fit bg-gray-500 text-white rounded"
+          className="ml-2 p-2 h-fit bg-blue-900 text-white rounded"
         > Search </button>
       </form>
-
 
       <div className="flex flex-wrap justify-center items-start gap-6 w-full px-4 overflow-y-auto flex-1">
         { movies.length > 0

@@ -1,5 +1,3 @@
-import { encode } from "punycode";
-
 const getPopularMovies = async () => {
     try {
         const response = await fetch('/api/movies/popular');
@@ -12,7 +10,7 @@ const getPopularMovies = async () => {
 
 const searchMovies = async (query) => {
     try {
-        const response = await fetch(`/api/movies/search?query=${encodeURIComponent(query)}`);
+        const response = await fetch(`/api/movies/search?searchquery=${query}`);
         const data = await response.json();
         return data;
     } catch (error) {
@@ -20,6 +18,15 @@ const searchMovies = async (query) => {
     }
 }
 
+const getMovieById = async (movieId) =>{
+    try {
+        const response = await fetch(`/api/movies/${movieId}`);
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching movie by ID:', error);
+    }
+}
 
 
 export { getPopularMovies, searchMovies };

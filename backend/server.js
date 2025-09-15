@@ -2,11 +2,17 @@ import express from "express";
 import dotenv from "dotenv";
 import cors from "cors";
 import path from "path";
+import mongoose from "mongoose";
 
 dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 3000;
 const __dirname = new URL(".", import.meta.url).pathname;
+
+mongoose.connect(process.env.MONGODB_URI).catch((err) => {
+	console.error("Failed to connect to MongoDB", err);
+	process.exit(1);
+});
 
 app.use(cors({ origin: ["http://localhost:3000"] }));
 app.use(express.json());
@@ -17,33 +23,25 @@ app.get("/", (req, res) => {
 	res.send("Welcome to the Movie Reviewer API");
 });
 
-app.get("/api/movies/popular", async (req, res) => {
-	const apiKey = process.env.THEMOVIEDB_API_KEY;
-	const baseUrl = process.env.THEMOVIEDB_BASE_URL;
-	const url = `${baseUrl}/movie/popular?api_key=${apiKey}&language=en-US&page=1`;
-	
-	try {
-		const response = await fetch(url);
-		if (!response.ok) {
-			const text = await response.text();
-			console.error("TMDB API error:", response.status, text);
-			return res.status(response.status).json({
-				error: "TMDB API error",
-				status: response.status,
-				body: text,
-			});
-		}
-		const data = await response.json();
-		res.json(data);
-	} catch (error) {
-		console.error("Error fetching popular movies:", error);
-		res.status(500).json({
-			error: "Failed to fetch popular movies",
-			details: error.message,
-		});
-	}
-});
+app.use(
+	"/api/movies",
+	(await import("./routes/third-party-api/getMovieById.js")).default
+);
 
-app.listen(PORT, () => {
-	console.log(`Server is running on port ${PORT}`);
+app.use(
+	"/api/movies/popular",
+	(await import("./routes/third-party-api/popularMovies.js")).default
+);
+app.use(
+	"/api/movies/search",
+	(await import("./routes/third-party-api/searchMovies.js")).default
+);
+
+app.use("/api/reviews", (await import("./routes/api/reviewMovies.js")).default);
+
+mongoose.connection.once("open", () => {
+	console.log("Connected to MongoDB");
+	app.listen(PORT, () => {
+		console.log(`Server is running on port ${PORT}`);
+	});
 });
