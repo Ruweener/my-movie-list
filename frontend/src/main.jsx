@@ -6,6 +6,7 @@ import App from './pages/home.jsx'
 import About from './pages/about.jsx';
 import CreateReview from './pages/createReview.jsx';
 import ViewReviews from './pages/viewReviews.jsx';
+import Watchlist from './pages/watchlist.jsx';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
@@ -15,6 +16,7 @@ createRoot(document.getElementById('root')).render(
         <Route path='/about' element={ <About /> } />
         <Route path='/reviews/create/:id/:title' element={ <CreateReview /> } />'
         <Route path='/reviews' element={ <ViewReviews /> } />
+        <Route path='/watchlist' element={ <Watchlist /> } />
       </Routes>
     </BrowserRouter>
   </StrictMode>,

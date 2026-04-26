@@ -38,6 +38,7 @@ app.use(
 );
 
 app.use("/api/reviews", (await import("./routes/api/reviewMovies.js")).default);
+app.use("/api/watchlist", (await import("./routes/api/watchlist.js")).default);
 
 mongoose.connection.once("open", () => {
 	console.log("Connected to MongoDB");

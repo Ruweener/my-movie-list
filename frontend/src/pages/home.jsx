@@ -4,7 +4,6 @@ import MovieCard from "../components/MovieCard";
 import NavBar from "../components/NavBar";
 
 function App() {
-
   const [movies, setMovies] = useState([]);
   const [query, setQuery] = useState("");
 

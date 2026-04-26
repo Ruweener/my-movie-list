@@ -20,21 +20,46 @@ const handleCreateReview = async (req, res) => {
 			.json({ error: "movieId, title, rating and header are required" });
 	}
 	try {
-		const newReview = new MovieReview({
-			movieId,
-			title,
-			header,
-			rating,
-			reviewText,
-		});
+		// Check if review exists before update
+		const existingReview = await MovieReview.findOne({ movieId });
+		const isNew = !existingReview;
+		
+		const updatedReview = await MovieReview.findOneAndUpdate(
+			{ movieId },
+			{
+				movieId,
+				title,
+				header,
+				rating,
+				reviewText,
+				timestamp: new Date(),
+			},
+			{ upsert: true, new: true }
+		);
 
-		const savedReview = await newReview.save();
-		console.log("Review saved:", savedReview);
-		res.status(201).json(savedReview);
+		const statusCode = isNew ? 201 : 200;
+		console.log(`Review ${isNew ? "created" : "updated"}:`, updatedReview);
+		res.status(statusCode).json(updatedReview);
 	} catch (error) {
-		console.error("Error creating review:", error);
-		res.status(500).json({ error: "Failed to create review" });
+		console.error("Error creating/updating review:", error);
+		res.status(500).json({ error: "Failed to create or update review" });
 	}
 };
 
-export { handleCreateReview, handleGetAllReviews };
+const handleDeleteReview = async (req, res) => {
+	const { id } = req.params;
+
+	try { 
+		const deletedReview = await MovieReview.deleteOne({ movieId: parseInt(id) });
+		if (deletedReview.deletedCount === 0) {
+			return res.status(404).json({ error: "Review not found" });
+		}
+
+		res.json({ message: "Review deleted" });
+	} catch (error) {
+		console.error("Error deleting review:", error);
+		res.status(500).json({ error: "Failed to delete review" });
+	}
+}
+
+export { handleCreateReview, handleGetAllReviews, handleDeleteReview };

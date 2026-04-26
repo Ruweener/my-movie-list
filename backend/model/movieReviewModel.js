@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 const { Schema } = mongoose;
 
 const movieReviewSchema = new Schema({
-    movieId: { type: Number, required: true },
+    movieId: { type: Number, required: true, unique: true },
     title: { type: String, required: true },
     header: { type: String, required: true },
     rating: { type: Number, required: true, min: 0, max: 10},
