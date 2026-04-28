@@ -1,18 +1,28 @@
 import NavBar from "../components/NavBar";
 import { useEffect, useState } from "react";
-import { getWatchlist, removeFromWatchlist } from "../services/api";
+import { useNavigate } from "react-router-dom";
+import MovieCard from "../components/MovieCard";
+import { getAllReviews, getWatchlist, removeFromWatchlist } from "../services/api";
 
 function Watchlist() {
     const [watchlistItems, setWatchlistItems] = useState([]);
+    const [reviewedMovieIds, setReviewedMovieIds] = useState(new Set());
     const [loading, setLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
         const fetchWatchlist = async () => {
             setLoading(true);
-            const items = await getWatchlist();
+            const [items, reviews] = await Promise.all([getWatchlist(), getAllReviews()]);
+
             if (items) {
                 setWatchlistItems(items);
             }
+
+            if (Array.isArray(reviews)) {
+                setReviewedMovieIds(new Set(reviews.map((review) => review.movieId)));
+            }
+
             setLoading(false);
         };
 
@@ -40,30 +50,33 @@ function Watchlist() {
                 ) : watchlistItems && watchlistItems.length > 0 ? (
                     <div className="flex flex-wrap justify-center items-start gap-6 w-full pb-10">
                         {watchlistItems.map((item) => {
-                            const posterPath = item.poster_path 
-                                ? `https://image.tmdb.org/t/p/original${item.poster_path}` 
-                                : "https://fireteller.com.au/wp-content/uploads/2020/09/Poster_Not_Available2.jpg";
+                            const movie = {
+                                id: item.movieId,
+                                title: item.title,
+                                poster_path: item.poster_path,
+                                release_date: item.release_date || ""
+                            };
+
+                            const hasReview = reviewedMovieIds.has(item.movieId);
 
                             return (
-                                <div 
-                                    key={item.movieId} 
-                                    className="relative bg-gray-700 m-2 p-2 rounded-md w-60 transform transition-transform duration-200 hover:scale-105"
-                                >
-                                    <h2 className="font-bold text-white">{item.title}</h2>
-                                    <img 
-                                        className="w-full mt-2 rounded-md" 
-                                        src={posterPath} 
-                                        alt={item.title} 
+                                <div key={item.movieId} className="flex flex-col items-center">
+                                    <MovieCard
+                                        movie={movie}
+                                        rating={-1}
+                                        isInWatchlist={true}
+                                        showWatchActions={true}
+                                        hasReview={hasReview}
+                                        onMarkAsWatched={() => {
+                                            if (!hasReview) {
+                                                navigate(`/reviews/create/${item.movieId}/${encodeURIComponent(item.title)}`);
+                                            }
+                                        }}
+                                        onWatchlistDelete={handleRemove}
                                     />
                                     <p className="text-xs text-gray-300 mt-2">
                                         Added: {new Date(item.addedAt).toLocaleDateString()}
                                     </p>
-                                    <button
-                                        onClick={() => handleRemove(item.movieId)}
-                                        className="w-full mt-3 px-3 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
-                                    >
-                                        Remove from Watchlist
-                                    </button>
                                 </div>
                             );
                         })}

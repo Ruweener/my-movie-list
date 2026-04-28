@@ -77,6 +77,20 @@ const removeFromWatchlist = async (movieId) => {
     }
 }
 
+const getAllReviews = async () => {
+    try {
+        const response = await fetch('/api/reviews', { cache: 'no-store' });
+        if (!response.ok) {
+            throw new Error('Failed to fetch reviews');
+        }
+        const data = await response.json();
+        return data;
+    } catch (error) {
+        console.error('Error fetching reviews:', error);
+        return [];
+    }
+}
+
 const createOrUpdateReview = async (movieId, title, header, rating, reviewText) => {
     try {
         const response = await fetch('/api/reviews', {
@@ -119,4 +133,4 @@ const deleteReview = async (movieId) => {
     }
 }
 
-export { getPopularMovies, searchMovies, getMovieById, getWatchlist, addToWatchlist, removeFromWatchlist, createOrUpdateReview, deleteReview };
+export { getPopularMovies, searchMovies, getMovieById, getWatchlist, addToWatchlist, removeFromWatchlist, getAllReviews, createOrUpdateReview, deleteReview };
