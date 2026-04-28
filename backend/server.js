@@ -24,17 +24,16 @@ app.get("/", (req, res) => {
 });
 
 app.use(
-	"/api/movies",
-	(await import("./routes/third-party-api/getMovieById.js")).default
-);
-
-app.use(
 	"/api/movies/popular",
 	(await import("./routes/third-party-api/popularMovies.js")).default
 );
 app.use(
 	"/api/movies/search",
 	(await import("./routes/third-party-api/searchMovies.js")).default
+);
+app.use(
+	"/api/movies",
+	(await import("./routes/third-party-api/getMovieById.js")).default
 );
 
 app.use("/api/reviews", (await import("./routes/api/reviewMovies.js")).default);
