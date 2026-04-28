@@ -4,7 +4,6 @@ const handleGetAllReviews = async (req, res) => {
 	try {
 		const reviews = await MovieReview.find();
 		res.json(reviews);
-		console.log(reviews);
 	} catch (error) {
 		console.error("Error fetching reviews:", error);
 		res.status(500).json({ error: "Failed to fetch reviews" });

@@ -1,10 +1,13 @@
 import NavBar from "../components/NavBar";
 import { useEffect, useState } from "react";
-import { deleteReview, getMovieById } from "../services/api";
+import { getMovieById } from "../services/api";
+import ReviewDetailModal from "../components/ReviewDetailModal";
 
 function ViewReviews() {
     const [movieReviews, setMovieReviews] = useState([]);
     const [movies, setMovies] = useState([]);
+    const [selectedReview, setSelectedReview] = useState(null);
+    const [selectedMovie, setSelectedMovie] = useState(null);
 
     const fetchReviews = async () => {
         const reviewsRes = await fetch('/api/reviews', { cache: 'no-store' });
@@ -32,14 +35,18 @@ function ViewReviews() {
         console.log("movies updated:", movies);
     }, [movies]);
 
-    const handleDeleteReview = async (movieId) => {
-        const result = await deleteReview(movieId);
+    const handleOpenReview = (review, movie) => {
+        setSelectedReview(review);
+        setSelectedMovie(movie);
+    };
 
-        if (result.success) {
-            await fetchReviews();
-        } else {
-            alert(`Failed to delete review: ${result.error}`);
-        }
+    const handleCloseModal = () => {
+        setSelectedReview(null);
+        setSelectedMovie(null);
+    };
+
+    const handleReviewDeleted = async () => {
+        await fetchReviews();
     };
 
     return (
@@ -58,7 +65,8 @@ function ViewReviews() {
                     return (
                         <div
                             key={ movie.id || idx }
-                            className="group relative bg-gray-700 m-2 p-2 rounded-md w-60 transform transition-transform duration-200 hover:scale-105"
+                            className="group relative bg-gray-700 m-2 p-2 rounded-md w-60 transform transition-transform duration-200 hover:scale-105 cursor-pointer"
+                            onClick={() => review && handleOpenReview(review, movie)}
                         >
                             <h2 className='font-bold text-white'>{ movie.title }</h2>
                             <p className='text-sm text-white'>{ movie.release_date }</p>
@@ -72,21 +80,23 @@ function ViewReviews() {
                             {review && (
                                 <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col items-center justify-center gap-3 rounded-md z-10">
                                     <div className="text-center px-3">
-                                        <p className="text-sm uppercase tracking-wide text-gray-300">Review</p>
+                                        <p className="text-sm uppercase tracking-wide text-gray-300">Click for full review</p>
                                         <p className="font-semibold text-white">{review.header}</p>
                                     </div>
-                                    <button
-                                        onClick={() => handleDeleteReview(movie.id)}
-                                        className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
-                                    >
-                                        Delete Review
-                                    </button>
                                 </div>
                             )}
                         </div>
                     );
                 }) : <p className="text-white mt-4">No reviews available.</p> }
             </div>
+
+            <ReviewDetailModal
+                review={selectedReview}
+                movie={selectedMovie}
+                isOpen={selectedReview !== null}
+                onClose={handleCloseModal}
+                onReviewDeleted={handleReviewDeleted}
+            />
         </div>
     )
 }

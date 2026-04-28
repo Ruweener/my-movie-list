@@ -1,13 +1,40 @@
-import { useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useState, useEffect } from "react";
+import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { createOrUpdateReview } from "../services/api.js";
 
 function CreateReview() {
     const { id, title } = useParams();
     const navigate = useNavigate();
+    const location = useLocation();
+    
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
     const [success, setSuccess] = useState(false);
+    const [formData, setFormData] = useState({
+        header: '',
+        rating: '',
+        reviewText: ''
+    });
+
+    useEffect(() => {
+        // If editing, pre-populate the form with existing review data
+        if (location.state?.review) {
+            const review = location.state.review;
+            setFormData({
+                header: review.header || '',
+                rating: review.rating || '',
+                reviewText: review.reviewText || ''
+            });
+        }
+    }, [location.state]);
+
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({
+            ...prev,
+            [name]: value
+        }));
+    };
 
     const handleSubmit = async (event) => {
         event.preventDefault();
@@ -15,18 +42,13 @@ function CreateReview() {
         setSuccess(false);
         setIsLoading(true);
 
-        const form = event.target;
-        const header = form[0].value;
-        const rating = form[1].value;
-        const reviewText = form[2].value;
-
         try {
             const result = await createOrUpdateReview(
                 parseInt(id),
                 title,
-                header,
-                parseFloat(rating),
-                reviewText
+                formData.header,
+                parseFloat(formData.rating),
+                formData.reviewText
             );
 
             if (result.success) {
@@ -64,15 +86,37 @@ function CreateReview() {
 
                 <div className="mb-4">
                     <label className="block mb-2">Header <span className="text-red-400">*</span></label>
-                    <input type="text" required className="w-full p-2 rounded border border-gray-300 text-gray-300" />
+                    <input 
+                        type="text" 
+                        name="header"
+                        value={formData.header}
+                        onChange={handleInputChange}
+                        required 
+                        className="w-full p-2 rounded border border-gray-300 text-gray-300" 
+                    />
                 </div>
                 <div className="mb-4">
                     <label className="block mb-2">Rating (1-10): <span className="text-red-400">*</span></label>
-                    <input type="number" min="1" max="10" required className="w-full p-2 rounded border border-gray-300 text-gray-300" />
+                    <input 
+                        type="number" 
+                        name="rating"
+                        value={formData.rating}
+                        onChange={handleInputChange}
+                        min="1" 
+                        max="10" 
+                        required 
+                        className="w-full p-2 rounded border border-gray-300 text-gray-300" 
+                    />
                 </div>
                 <div className="mb-4">
                     <label className="block mb-2">Review:</label>
-                    <textarea className="w-full p-2 rounded border border-gray-300 text-gray-300" rows="5"></textarea>
+                    <textarea 
+                        name="reviewText"
+                        value={formData.reviewText}
+                        onChange={handleInputChange}
+                        className="w-full p-2 rounded border border-gray-300 text-gray-300" 
+                        rows="5"
+                    ></textarea>
                 </div>
                 <button
                     type="submit"
