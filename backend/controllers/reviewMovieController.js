@@ -2,7 +2,24 @@ import MovieReview from "../model/movieReviewModel.js";
 
 const handleGetAllReviews = async (req, res) => {
 	try {
-		const reviews = await MovieReview.find();
+		const { sort } = req.query;
+		let sortOption = {};
+
+		// Apply sorting based on query parameter
+		switch (sort) {
+			case 'rating_high':
+				sortOption = { rating: -1 }; // Highest rated first
+				break;
+			case 'rating_low':
+				sortOption = { rating: 1 }; // Lowest rated first
+				break;
+			case 'date':
+			default:
+				sortOption = { timestamp: -1 }; // Most recent first
+				break;
+		}
+
+		const reviews = await MovieReview.find().sort(sortOption);
 		res.json(reviews);
 	} catch (error) {
 		console.error("Error fetching reviews:", error);

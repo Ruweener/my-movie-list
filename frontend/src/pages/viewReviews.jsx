@@ -8,16 +8,17 @@ function ViewReviews() {
     const [movies, setMovies] = useState([]);
     const [selectedReview, setSelectedReview] = useState(null);
     const [selectedMovie, setSelectedMovie] = useState(null);
+    const [sortBy, setSortBy] = useState('date');
 
-    const fetchReviews = async () => {
-        const reviewsRes = await fetch('/api/reviews', { cache: 'no-store' });
+    const fetchReviews = async (sortOption = 'date') => {
+        const reviewsRes = await fetch(`/api/reviews?sort=${sortOption}`, { cache: 'no-store' });
         const reviews = await reviewsRes.json();
         setMovieReviews(reviews);
     };
 
     useEffect(() => {
-        fetchReviews();
-    }, []);
+        fetchReviews(sortBy);
+    }, [sortBy]);
 
     useEffect(() => {
         console.log("movieReviews updated:", movieReviews);
@@ -46,17 +47,25 @@ function ViewReviews() {
     };
 
     const handleReviewDeleted = async () => {
-        await fetchReviews();
+        await fetchReviews(sortBy);
+    };
+
+    const handleSortChange = (e) => {
+        setSortBy(e.target.value);
     };
 
     return (
         <div className="w-full h-screen flex flex-col items-center bg-gray-800 text-white">
             <NavBar />
 
-            <select className="mt-24 p-2 w-1/3 bg-gray-700 rounded ">
-                <option value="most_recent">Most Recent</option>
-                <option value="highest_rated">Highest Rated</option>
-                <option value="lowest_rated">Lowest Rated</option>
+            <select 
+                className="mt-24 p-2 w-1/3 bg-gray-700 rounded "
+                value={sortBy}
+                onChange={handleSortChange}
+            >
+                <option value="date">Most Recent</option>
+                <option value="rating_high">Highest Rated</option>
+                <option value="rating_low">Lowest Rated</option>
             </select>
 
             <div className="flex flex-wrap justify-center items-start gap-6 w-full px-4 m-5 overflow-y-auto flex-1">

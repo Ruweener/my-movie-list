@@ -26,7 +26,7 @@ function ReviewDetailModal({ review, movie, isOpen, onClose, onReviewDeleted }) 
 
     const getRatingColor = (rating) => {
         if (rating >= 8) return 'bg-green-600';
-        if (rating >= 6) return 'bg-yellow-600';
+        if (rating >= 4) return 'bg-yellow-600';
         return 'bg-red-600';
     };
 
