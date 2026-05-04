@@ -10,7 +10,7 @@ const getPopularMovies = async () => {
 
 const searchMovies = async (query) => {
     try {
-        const response = await fetch(`/api/movies/search?searchquery=${query}`);
+        const response = await fetch(`/api/movies/search?searchquery=${encodeURIComponent(query)}`);
         const data = await response.json();
         return data;
     } catch (error) {

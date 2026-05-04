@@ -14,7 +14,7 @@ createRoot(document.getElementById('root')).render(
       <Routes>
         <Route path='/' element={ <App /> } />
         <Route path='/about' element={ <About /> } />
-        <Route path='/reviews/create/:id/:title' element={ <CreateReview /> } />'
+        <Route path='/reviews/create/:id/:title' element={ <CreateReview /> } />
         <Route path='/reviews' element={ <ViewReviews /> } />
         <Route path='/watchlist' element={ <Watchlist /> } />
       </Routes>

@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate, useLocation } from "react-router-dom";
 import { createOrUpdateReview } from "../services/api.js";
+import Footer from "../components/Footer";
 
 function CreateReview() {
     const { id, title } = useParams();
@@ -68,8 +69,8 @@ function CreateReview() {
     };
 
     return (
-        <div className="w-full h-screen flex flex-col items-center justify-center bg-gray-800 text-white">
-            <form className="bg-gray-700 p-6 rounded-md shadow-md w-1/2" onSubmit={handleSubmit}>
+            <div className="w-full min-h-screen flex flex-col items-center justify-center bg-gray-800 text-white">
+                <form className="bg-gray-700 p-6 rounded-md shadow-md w-1/2" onSubmit={handleSubmit}>
                 <h2 className="text-2xl font-bold mb-4">Create/Update Review for "{decodeURIComponent(title)}"</h2>
 
                 {error && (
@@ -126,6 +127,7 @@ function CreateReview() {
                     {isLoading ? "Saving..." : "Submit Review"}
                 </button>
             </form>
+            <Footer />
         </div>
     );
 }

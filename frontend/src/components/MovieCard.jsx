@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { addToWatchlist } from '../services/api';
 
-function MovieCard({ movie, rating = -1, isInWatchlist = false, showWatchActions = false, hasReview = false, onWatchlistDelete, onMarkAsWatched }) {
+function MovieCard({ movie, rating = -1, isInWatchlist = false, showWatchActions = false, hasReview = false, onWatchlistDelete, onMarkAsWatched, addedDate }) {
     const [hovered, setHovered] = useState(false);
     const [feedback, setFeedback] = useState('');
 
@@ -51,6 +51,11 @@ function MovieCard({ movie, rating = -1, isInWatchlist = false, showWatchActions
         >
             <h2 className='font-bold text-white'>{ movie.title }</h2>
             <p className='text-sm text-white'>{ movie.release_date }</p>
+            { addedDate && (
+                <p className="text-xs text-gray-300">
+                    {new Date(addedDate).toLocaleDateString()}
+                </p>
+            ) }
             <img className={ imageClassNames } src={ posterPath } alt={ movie.title } />
 
             { (hovered && rating == -1) && (

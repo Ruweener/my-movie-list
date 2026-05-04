@@ -1,4 +1,5 @@
 import NavBar from "../components/NavBar";
+import Footer from "../components/Footer";
 import { useEffect, useState } from "react";
 import { getMovieById } from "../services/api";
 import ReviewDetailModal from "../components/ReviewDetailModal";
@@ -55,11 +56,11 @@ function ViewReviews() {
     };
 
     return (
-        <div className="w-full h-screen flex flex-col items-center bg-gray-800 text-white">
+        <div className="w-full min-h-screen flex flex-col items-center bg-gray-800 text-white">
             <NavBar />
 
             <select 
-                className="mt-24 p-2 w-1/3 bg-gray-700 rounded "
+                className="mt-6 p-2 w-1/3 bg-gray-700 rounded "
                 value={sortBy}
                 onChange={handleSortChange}
             >
@@ -106,6 +107,7 @@ function ViewReviews() {
                 onClose={handleCloseModal}
                 onReviewDeleted={handleReviewDeleted}
             />
+            <Footer />
         </div>
     )
 }

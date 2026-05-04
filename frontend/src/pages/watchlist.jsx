@@ -1,4 +1,5 @@
 import NavBar from "../components/NavBar";
+import Footer from "../components/Footer";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import MovieCard from "../components/MovieCard";
@@ -39,10 +40,10 @@ function Watchlist() {
     };
 
     return (
-        <div className="w-full h-screen flex flex-col items-center bg-gray-800 text-white">
+        <div className="w-full min-h-screen flex flex-col items-center bg-gray-800 text-white">
             <NavBar />
 
-            <div className="mt-24 w-full flex flex-col items-center flex-1 overflow-y-auto px-4">
+            <div className="mt-6 w-full flex flex-col items-center flex-1 overflow-y-auto px-4">
                 <h1 className="text-3xl font-bold mb-6">My Watchlist</h1>
 
                 {loading ? (
@@ -67,6 +68,7 @@ function Watchlist() {
                                         isInWatchlist={true}
                                         showWatchActions={true}
                                         hasReview={hasReview}
+                                        addedDate={item.addedAt}
                                         onMarkAsWatched={() => {
                                             if (!hasReview) {
                                                 navigate(`/reviews/create/${item.movieId}/${encodeURIComponent(item.title)}`);
@@ -74,9 +76,6 @@ function Watchlist() {
                                         }}
                                         onWatchlistDelete={handleRemove}
                                     />
-                                    <p className="text-xs text-gray-300 mt-2">
-                                        Added: {new Date(item.addedAt).toLocaleDateString()}
-                                    </p>
                                 </div>
                             );
                         })}
@@ -85,6 +84,7 @@ function Watchlist() {
                     <p className="text-white mt-4">Your watchlist is empty. Add some movies!</p>
                 )}
             </div>
+                <Footer />
         </div>
     );
 }
