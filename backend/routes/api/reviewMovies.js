@@ -5,6 +5,9 @@ import {
 	handleGetAllReviews,
 	handleDeleteReview,
 } from "../../controllers/reviewMovieController.js";
+import requireAuth from "../../middleware/requireAuth.js";
+
+router.use(requireAuth);
 
 router.route("/")
     .post(handleCreateReview)

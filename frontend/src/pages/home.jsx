@@ -1,13 +1,29 @@
 import { useEffect, useRef, useState } from "react";
-import { getPopularMovies, searchMovies } from "../services/api";
+import { getPopularMovies, searchMovies, getMoviesByGenre, getMovieById, getMovieProviders } from "../services/api";
 import MovieCard from "../components/MovieCard";
 import NavBar from "../components/NavBar";
 import Footer from "../components/Footer";
+import MovieInfoModal from "../components/MovieInfoModal";
+
+// Hardcoded popular genres with icons
+const POPULAR_GENRES = [
+  { id: 28, name: "Action", icon: "🤜" },
+  { id: 35, name: "Comedy", icon: "😂" },
+  { id: 18, name: "Drama", icon: "🎭" },
+  { id: 53, name: "Thriller", icon: "😰" },
+  { id: 12, name: "Adventure", icon: "🗺️" }
+];
 
 function App() {
   const [movies, setMovies] = useState([]);
   const [query, setQuery] = useState("");
+  const [selectedGenre, setSelectedGenre] = useState("");
+  const [selectedMovie, setSelectedMovie] = useState(null);
+  const [selectedProviders, setSelectedProviders] = useState(null);
+  const [isInfoOpen, setIsInfoOpen] = useState(false);
+  const [isInfoLoading, setIsInfoLoading] = useState(false);
   const initialSearchLoadRef = useRef(true);
+  const infoRequestRef = useRef(0);
 
   useEffect(() => {
     fetchMovies();
@@ -30,6 +46,7 @@ function App() {
         const results = await searchMovies(trimmedQuery);
         if (isActive) {
           setMovies(results.results || []);
+          setSelectedGenre("");
         }
       } else {
         const movies = await getPopularMovies();
@@ -45,35 +62,122 @@ function App() {
     };
   }, [query]);
 
-
   const fetchMovies = async () => {
     const movies = await getPopularMovies();
     setMovies(movies.results || []);
   }
 
+  const handleGenreChange = async (e) => {
+    const genreId = e.target.value;
+    setSelectedGenre(genreId);
+    setQuery("");
+    
+    if (genreId) {
+      const genreMovies = await getMoviesByGenre(genreId);
+      setMovies(genreMovies);
+    } else {
+      fetchMovies();
+    }
+  }
+
+  const handleOpenMovieInfo = async (movie) => {
+    const requestId = infoRequestRef.current + 1;
+    infoRequestRef.current = requestId;
+
+    setIsInfoOpen(true);
+    setIsInfoLoading(true);
+    setSelectedMovie(movie);
+    setSelectedProviders(null);
+
+    try {
+      const [movieDetails, providers] = await Promise.all([
+        getMovieById(movie.id),
+        getMovieProviders(movie.id),
+      ]);
+
+      if (infoRequestRef.current !== requestId) {
+        return;
+      }
+
+      setSelectedMovie({ ...movie, ...movieDetails });
+      setSelectedProviders(providers);
+    } catch {
+      if (infoRequestRef.current !== requestId) {
+        return;
+      }
+
+      setSelectedMovie(movie);
+      setSelectedProviders(null);
+    } finally {
+      if (infoRequestRef.current === requestId) {
+        setIsInfoLoading(false);
+      }
+    }
+  };
+
+  const handleCloseMovieInfo = () => {
+    infoRequestRef.current += 1;
+    setIsInfoOpen(false);
+    setSelectedMovie(null);
+    setSelectedProviders(null);
+    setIsInfoLoading(false);
+  };
+
   return (
-    <div className="flex flex-col items-center w-full min-h-screen bg-gray-800">
+    <div className="w-full min-h-screen bg-gray-900">
       <NavBar />
-      <img src="/logo.png" alt="Logo" className="w-1/5 h-1/5 " />
+      <main className="max-w-7xl mx-auto px-4 py-6">
+        <div className="mb-6">
+          <div className="mb-4">
+            <input
+              type="text"
+              placeholder="Search movies..."
+              className="w-full px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 text-white placeholder-gray-400 focus:outline-none focus:border-amber-500 transition"
+              value={ query }
+              onChange={ (e) => setQuery(e.target.value) }
+            />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => handleGenreChange({ target: { value: '' } })}
+              className={`genre-pill ${ selectedGenre === '' ? 'genre-pill--active' : 'genre-pill--inactive' }`}
+            >
+              Trending
+            </button>
+            {POPULAR_GENRES.map((genre) => (
+              <button
+                key={genre.id}
+                onClick={() => handleGenreChange({ target: { value: genre.id } })}
+                className={`genre-pill ${ selectedGenre == genre.id ? 'genre-pill--active' : 'genre-pill--inactive' }`}
+              >
+                <span className="text-lg">{genre.icon}</span>
+                <span>{genre.name}</span>
+              </button>
+            ))}
+          </div>
+        </div>
 
-      <h1 className="text-white font-bold text-2xl -mt-8 font-serif">FilmNotes</h1>
+        <div className="mb-6">
+          <h2 className="text-2xl font-bold text-white mb-2">
+            {selectedGenre ? POPULAR_GENRES.find(g => g.id == selectedGenre)?.name : 'Trending'}
+          </h2>
+          <p className="text-gray-400 text-sm">Hover a poster to see details, add to watchlist or write a review.</p>
+        </div>
 
-
-      <div className="flex w-full justify-center m-1 mt-4">
-        <input
-          type="text"
-          placeholder="Search movies..."
-          className="w-1/3 p-2 mb-4 rounded border border-gray-300 text-amber-50"
-          value={ query }
-          onChange={ (e) => setQuery(e.target.value) }
-        />
-      </div>
-
-      <div className="flex flex-wrap justify-center items-start gap-6 w-full px-4 pb-6">
+        <div className="flex flex-wrap justify-center gap-4">
         { movies.length > 0
-          ? movies.map((movie) => <MovieCard key={ movie.id } movie={ movie } />)
+          ? movies.map((movie) => <MovieCard key={ movie.id } movie={ movie } onInfoClick={handleOpenMovieInfo} />)
           : null }
-      </div>
+        </div>
+
+        <MovieInfoModal
+          isOpen={isInfoOpen}
+          movie={selectedMovie || { title: '', release_date: '', poster_path: null, overview: '', genres: [] }}
+          providers={selectedProviders}
+          isLoading={isInfoLoading}
+          onClose={handleCloseMovieInfo}
+        />
+      </main>
       <Footer />
     </div>
   );

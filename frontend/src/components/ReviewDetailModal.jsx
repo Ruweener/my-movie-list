@@ -26,7 +26,7 @@ function ReviewDetailModal({ review, movie, isOpen, onClose, onReviewDeleted }) 
 
     const getRatingColor = (rating) => {
         if (rating >= 8) return 'bg-green-600';
-        if (rating >= 4) return 'bg-yellow-600';
+        if (rating >= 4) return 'bg-blue-600';
         return 'bg-red-600';
     };
 
@@ -51,7 +51,7 @@ function ReviewDetailModal({ review, movie, isOpen, onClose, onReviewDeleted }) 
             } else {
                 setDeleteError(result.error || 'Failed to delete review');
             }
-        } catch (error) {
+        } catch {
             setDeleteError('An unexpected error occurred');
         } finally {
             setIsDeleting(false);
@@ -63,87 +63,96 @@ function ReviewDetailModal({ review, movie, isOpen, onClose, onReviewDeleted }) 
         : "https://fireteller.com.au/wp-content/uploads/2020/09/Poster_Not_Available2.jpg";
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-            <div className="bg-gray-700 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-                {/* Close Button */}
-                <div className="flex justify-end p-4 border-b border-gray-600">
-                    <button
-                        onClick={onClose}
-                        className="text-gray-300 hover:text-white transition text-2xl font-bold"
-                    >
-                        ✕
-                    </button>
-                </div>
+        <>
+            <style>{`
+                .modal-scrollbar::-webkit-scrollbar { width: 10px; }
+                .modal-scrollbar::-webkit-scrollbar-track { background: rgba(55,65,81,0.45); border-radius: 6px; }
+                .modal-scrollbar::-webkit-scrollbar-thumb { background: rgba(99,102,106,0.7); border-radius: 6px; }
+                .modal-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(99,102,106,1); }
+            `}</style>
 
-                {/* Content */}
-                <div className="p-6">
-                    <div className="flex gap-6 mb-6">
-                        {/* Poster */}
-                        <div className="flex-shrink-0">
-                            <img
-                                src={posterPath}
-                                alt={movie.title}
-                                className="w-40 h-auto rounded-lg shadow-lg"
-                            />
-                        </div>
+            <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+                <div className="modal-scrollbar bg-gradient-to-br from-gray-700 to-gray-800 rounded-lg max-w-2xl w-full max-h-[90vh] overflow-y-auto shadow-2xl border border-gray-600">
+                    {/* Close Button */}
+                    <div className="flex justify-end p-4 border-b border-gray-600">
+                        <button
+                            onClick={onClose}
+                            className="text-gray-300 hover:text-white transition text-2xl font-bold hover:scale-110 transform duration-200"
+                        >
+                            ✕
+                        </button>
+                    </div>
 
-                        {/* Review Details */}
-                        <div className="flex-grow">
-                            <h2 className="text-2xl font-bold text-white mb-2">{movie.title}</h2>
-                            <p className="text-sm text-gray-300 mb-4">Released: {movie.release_date}</p>
-
-                            <div className="mb-4">
-                                <h3 className="text-xl font-semibold text-white mb-2">{review.header}</h3>
-
-                                {/* Rating Badge */}
-                                <div className={`inline-flex items-center gap-2 px-3 py-1 rounded-lg ${getRatingColor(review.rating)} text-white font-bold mb-4`}>
-                                    <span className="text-xl">{review.rating}</span>
-                                    <span className="text-sm">/10</span>
-                                </div>
+                    {/* Content */}
+                    <div className="p-6">
+                        <div className="flex gap-6 mb-6">
+                            {/* Poster */}
+                            <div className="flex-shrink-0">
+                                <img
+                                    src={posterPath}
+                                    alt={movie.title}
+                                    className="w-40 h-auto rounded-lg shadow-2xl border border-gray-600"
+                                />
                             </div>
 
-                            {/* Timestamp */}
-                            <p className="text-xs text-gray-400 mb-4">
-                                {formatDate(review.timestamp)}
-                            </p>
+                            {/* Review Details */}
+                            <div className="flex-grow">
+                                <h2 className="text-3xl font-bold text-white mb-2">{movie.title}</h2>
+                                <p className="text-sm text-gray-400 mb-4">Released: {movie.release_date}</p>
 
-                            {/* Review Text */}
-                            <p className="text-gray-100 leading-relaxed text-sm mb-6">
-                                {review.reviewText || 'No review text provided.'}
-                            </p>
+                                <div className="mb-4">
+                                    <h3 className="text-xl font-semibold text-white mb-2">{review.header}</h3>
 
-                            {/* Error Message */}
-                            {deleteError && (
-                                <div className="mb-4 p-3 bg-red-600 text-white rounded text-sm">
-                                    Error: {deleteError}
+                                    {/* Rating Badge */}
+                                    <div className={`inline-flex items-center gap-2 px-4 py-2 rounded-lg ${getRatingColor(review.rating)} text-white font-bold mb-4 shadow-md border border-gray-700/40 backdrop-blur-sm`}>
+                                        <span className="text-2xl">{review.rating}</span>
+                                        <span className="text-sm">/10</span>
+                                    </div>
                                 </div>
-                            )}
 
-                            {/* Action Buttons */}
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={handleEdit}
-                                    className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-                                >
-                                    Edit Review
-                                </button>
-                                <button
-                                    onClick={handleDelete}
-                                    disabled={isDeleting}
-                                    className={`px-4 py-2 rounded text-white transition ${
-                                        isDeleting
-                                            ? 'bg-red-400 cursor-not-allowed'
-                                            : 'bg-red-600 hover:bg-red-700'
-                                    }`}
-                                >
-                                    {isDeleting ? 'Deleting...' : 'Delete Review'}
-                                </button>
+                                {/* Timestamp */}
+                                <p className="text-xs text-gray-400 mb-4">
+                                    {formatDate(review.timestamp)}
+                                </p>
+
+                                {/* Review Text */}
+                                <p className="text-gray-100 leading-relaxed text-sm mb-6">
+                                    {review.reviewText || 'No review text provided.'}
+                                </p>
+
+                                {/* Error Message */}
+                                {deleteError && (
+                                    <div className="mb-4 p-3 bg-red-600 text-white rounded text-sm">
+                                        Error: {deleteError}
+                                    </div>
+                                )}
+
+                                {/* Action Buttons */}
+                                <div className="flex gap-3">
+                                    <button
+                                        onClick={handleEdit}
+                                        className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition transform hover:scale-105 font-semibold"
+                                    >
+                                        Edit Review
+                                    </button>
+                                    <button
+                                        onClick={handleDelete}
+                                        disabled={isDeleting}
+                                        className={`px-4 py-2 rounded-md text-white transition transform ${
+                                            isDeleting
+                                                ? 'bg-red-400 cursor-not-allowed'
+                                                : 'bg-red-600 hover:bg-red-700 hover:scale-105'
+                                        } font-semibold`}
+                                    >
+                                        {isDeleting ? 'Deleting...' : 'Delete Review'}
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 }
 

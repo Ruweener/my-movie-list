@@ -32,6 +32,18 @@ app.use(
 	(await import("./routes/third-party-api/searchMovies.js")).default
 );
 app.use(
+	"/api/movies/genres",
+	(await import("./routes/third-party-api/getGenres.js")).default
+);
+app.use(
+	"/api/movies/genre",
+	(await import("./routes/third-party-api/getMoviesByGenre.js")).default
+);
+app.use(
+	"/api/movies/providers",
+	(await import("./routes/third-party-api/getMovieProviders.js")).default
+);
+app.use(
 	"/api/movies",
 	(await import("./routes/third-party-api/getMovieById.js")).default
 );
@@ -39,8 +51,27 @@ app.use(
 app.use("/api/reviews", (await import("./routes/api/reviewMovies.js")).default);
 app.use("/api/watchlist", (await import("./routes/api/watchlist.js")).default);
 
-mongoose.connection.once("open", () => {
+const cleanupLegacyReviewIndexes = async () => {
+	try {
+		const collection = mongoose.connection.collection("moviereviewmodels");
+		const indexes = await collection.indexes();
+		const legacyMovieIdIndex = indexes.find((index) => index.name === "movieId_1" && index.unique);
+
+		if (legacyMovieIdIndex) {
+			await collection.dropIndex("movieId_1");
+			console.log("Dropped legacy unique index: movieId_1");
+		}
+	} catch (error) {
+		// Collection may not exist yet on a fresh DB; that's safe to ignore.
+		if (error.codeName !== "NamespaceNotFound") {
+			console.error("Failed cleaning review indexes:", error.message);
+		}
+	}
+};
+
+mongoose.connection.once("open", async () => {
 	console.log("Connected to MongoDB");
+	await cleanupLegacyReviewIndexes();
 	app.listen(PORT, () => {
 		console.log(`Server is running on port ${PORT}`);
 	});

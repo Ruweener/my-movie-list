@@ -2,7 +2,7 @@ import Watchlist from "../model/watchlistModel.js";
 
 const handleGetWatchlist = async (req, res) => {
 	try {
-		const watchlist = await Watchlist.find().sort({ addedAt: -1 });
+		const watchlist = await Watchlist.find({ userId: req.user.id }).sort({ addedAt: -1 });
 		res.json(watchlist);
 		console.log("Watchlist fetched:", watchlist);
 	} catch (error) {
@@ -20,12 +20,13 @@ const handleAddToWatchlist = async (req, res) => {
 
 	try {
 		// Check if already exists
-		const existing = await Watchlist.findOne({ movieId });
+		const existing = await Watchlist.findOne({ userId: req.user.id, movieId });
 		if (existing) {
 			return res.status(409).json({ error: "Movie already in watchlist", movie: existing });
 		}
 
 		const newWatchlistItem = new Watchlist({
+			userId: req.user.id,
 			movieId,
 			title,
 			poster_path,
@@ -44,7 +45,7 @@ const handleRemoveFromWatchlist = async (req, res) => {
 	const { movieId } = req.params;
 
 	try {
-		const deletedItem = await Watchlist.deleteOne({ movieId: parseInt(movieId) });
+		const deletedItem = await Watchlist.deleteOne({ userId: req.user.id, movieId: parseInt(movieId) });
 		if (deletedItem.deletedCount === 0) {
 			return res.status(404).json({ error: "Movie not found in watchlist" });
 		}

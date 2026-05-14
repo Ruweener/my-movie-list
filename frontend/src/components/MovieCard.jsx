@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { addToWatchlist } from '../services/api';
 
-function MovieCard({ movie, rating = -1, isInWatchlist = false, showWatchActions = false, hasReview = false, onWatchlistDelete, onMarkAsWatched, addedDate }) {
+function MovieCard({ movie, rating = -1, isInWatchlist = false, showWatchActions = false, hasReview = false, onWatchlistDelete, onMarkAsWatched, onInfoClick, addedDate }) {
     const [hovered, setHovered] = useState(false);
     const [feedback, setFeedback] = useState('');
 
@@ -43,35 +43,56 @@ function MovieCard({ movie, rating = -1, isInWatchlist = false, showWatchActions
         }
     };
 
+    const handleInfoClick = (e) => {
+        e.stopPropagation();
+        if (onInfoClick) {
+            onInfoClick(movie);
+        }
+    };
+
     return (
         <div
-            className='relative bg-gray-700 m-2 p-2 rounded-md w-60 transform transition-transform duration-200 hover:scale-105'
+            className='relative bg-gradient-to-br from-gray-700 to-gray-800 m-2 p-3 rounded-lg w-60 transform transition-all duration-250 hover:scale-105 hover:shadow-2xl border border-gray-600 overflow-hidden'
             onMouseEnter={ () => setHovered(true) }
             onMouseLeave={ () => setHovered(false) }
         >
-            <h2 className='font-bold text-white'>{ movie.title }</h2>
-            <p className='text-sm text-white'>{ movie.release_date }</p>
-            { addedDate && (
-                <p className="text-xs text-gray-300">
-                    {new Date(addedDate).toLocaleDateString()}
-                </p>
-            ) }
+            <div className='pb-2'>
+                <h2 className='font-bold text-white text-sm leading-snug'>{ movie.title }</h2>
+                <p className='text-xs text-gray-400 mt-1'>{ movie.release_date }</p>
+                { addedDate && (
+                    <p className="text-xs text-gray-500 mt-1">
+                        Added {new Date(addedDate).toLocaleDateString()}
+                    </p>
+                ) }
+            </div>
             <img className={ imageClassNames } src={ posterPath } alt={ movie.title } />
 
             { (hovered && rating == -1) && (
-                <div className="absolute inset-0 bg-opacity-60 flex flex-col items-center justify-center gap-2 rounded-md z-10">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent flex flex-col items-center justify-center gap-3 rounded-lg z-10 backdrop-blur-sm">
+                    {onInfoClick && (
+                        <button
+                            type="button"
+                            onClick={handleInfoClick}
+                            className="px-4 py-2 bg-blue-600 text-white text-sm rounded-md hover:bg-blue-700 transition transform hover:scale-105 font-semibold"
+                            aria-label={`More info about ${movie.title}`}
+                            title="More info"
+                        >
+                            Info
+                        </button>
+                    )}
+
                     {isInWatchlist && showWatchActions ? (
                         <>
                             <button
                                 onClick={handleMarkAsWatched}
                                 disabled={hasReview}
-                                className={`px-3 py-1 text-white rounded transition ${hasReview ? 'bg-gray-500 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'}`}
+                                className={`px-4 py-2 text-white text-sm rounded-md transition transform hover:scale-105 font-semibold ${hasReview ? 'bg-gray-600 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'}`}
                             >
                                 {hasReview ? 'Already Reviewed' : 'Write a Review'}
                             </button>
                             <button
                                 onClick={handleDeleteFromWatchlist}
-                                className="px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700 transition"
+                                className="px-4 py-2 bg-red-600 text-white text-sm rounded-md hover:bg-red-700 transition transform hover:scale-105 font-semibold"
                             >
                                 Delete
                             </button>
@@ -80,26 +101,26 @@ function MovieCard({ movie, rating = -1, isInWatchlist = false, showWatchActions
                         <>
                             <button 
                                 onClick={handleAddToWatchlist}
-                                className="px-3 py-1 bg-amber-500 text-white rounded hover:bg-amber-600 transition"
+                                className="px-4 py-2 bg-amber-600 text-white text-sm rounded-md hover:bg-amber-700 transition transform hover:scale-105 font-semibold"
                             >
                                 Add to Watchlist
                             </button>
-                            <Link to={`/reviews/create/${movie.id}/${encodeURIComponent(movie.title)}`} className="px-3 py-1 bg-green-500 text-white rounded hover:bg-green-600 transition">Write a Review</Link>
+                            <Link to={`/reviews/create/${movie.id}/${encodeURIComponent(movie.title)}`} className="px-4 py-2 bg-emerald-600 text-white text-sm rounded-md hover:bg-emerald-700 transition transform hover:scale-105 font-semibold">Write a Review</Link>
                         </>
                     )}
                 </div>
             ) }
 
             { rating != -1 && (
-                <div className="absolute bottom-2 right-2 text-white px-2 py-1 rounded size-fit bg-gray-700 inline-flex">
-                    <p className='font-bold text-3xl'>{rating}</p>
-                    <p className='inline ml-1'> /10</p>
+                <div className="absolute bottom-3 right-3 text-white px-3 py-1 rounded-lg bg-gray-900/90 backdrop-blur-sm inline-flex border border-gray-700">
+                    <p className='font-bold text-2xl'>{rating}</p>
+                    <p className='text-xs ml-1 self-center text-gray-300'> /10</p>
                 </div>
             ) }
 
             { feedback && (
-                <div className="absolute inset-0 bg-black bg-opacity-70 flex items-center justify-center rounded-md z-20">
-                    <p className="text-white text-center text-sm">{feedback}</p>
+                <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center rounded-lg z-20 border border-gray-600">
+                    <p className="text-white text-center text-sm font-medium">{feedback}</p>
                 </div>
             ) }
         </div>

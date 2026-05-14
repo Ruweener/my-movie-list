@@ -5,6 +5,9 @@ import {
 	handleAddToWatchlist,
 	handleRemoveFromWatchlist,
 } from "../../controllers/watchlistController.js";
+import requireAuth from "../../middleware/requireAuth.js";
+
+router.use(requireAuth);
 
 router.route("/")
 	.get(handleGetWatchlist)

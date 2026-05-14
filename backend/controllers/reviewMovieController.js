@@ -19,7 +19,7 @@ const handleGetAllReviews = async (req, res) => {
 				break;
 		}
 
-		const reviews = await MovieReview.find().sort(sortOption);
+		const reviews = await MovieReview.find({ userId: req.user.id }).sort(sortOption);
 		res.json(reviews);
 	} catch (error) {
 		console.error("Error fetching reviews:", error);
@@ -37,12 +37,13 @@ const handleCreateReview = async (req, res) => {
 	}
 	try {
 		// Check if review exists before update
-		const existingReview = await MovieReview.findOne({ movieId });
+		const existingReview = await MovieReview.findOne({ userId: req.user.id, movieId });
 		const isNew = !existingReview;
 		
 		const updatedReview = await MovieReview.findOneAndUpdate(
-			{ movieId },
+			{ userId: req.user.id, movieId },
 			{
+				userId: req.user.id,
 				movieId,
 				title,
 				header,
@@ -66,7 +67,7 @@ const handleDeleteReview = async (req, res) => {
 	const { id } = req.params;
 
 	try { 
-		const deletedReview = await MovieReview.deleteOne({ movieId: parseInt(id) });
+		const deletedReview = await MovieReview.deleteOne({ userId: req.user.id, movieId: parseInt(id) });
 		if (deletedReview.deletedCount === 0) {
 			return res.status(404).json({ error: "Review not found" });
 		}

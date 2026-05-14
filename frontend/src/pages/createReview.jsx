@@ -71,7 +71,7 @@ function CreateReview() {
     return (
             <div className="w-full min-h-screen flex flex-col items-center justify-center bg-gray-800 text-white">
                 <form className="bg-gray-700 p-6 rounded-md shadow-md w-1/2" onSubmit={handleSubmit}>
-                <h2 className="text-2xl font-bold mb-4">Create/Update Review for "{decodeURIComponent(title)}"</h2>
+                <h2 className="text-2xl font-bold mb-4">{decodeURIComponent(title)}</h2>
 
                 {error && (
                     <div className="mb-4 p-3 bg-red-600 text-white rounded">
@@ -127,7 +127,6 @@ function CreateReview() {
                     {isLoading ? "Saving..." : "Submit Review"}
                 </button>
             </form>
-            <Footer />
         </div>
     );
 }
